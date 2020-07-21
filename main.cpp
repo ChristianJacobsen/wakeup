@@ -13,7 +13,11 @@
 
 namespace asio = boost::asio;
 
-int send_wake_on_lan_packet(std::string_view mac_address, std::uint16_t port);
+std::optional<std::vector<std::uint8_t>> mac_address_to_byte_vector(std::string_view mac_address);
+
+std::vector<std::uint8_t> create_wake_on_lan_payload(const std::vector<std::uint8_t> &mac_address_byte_vector);
+
+int send_payload(const std::vector<uint8_t> &payload, std::uint16_t port);
 
 int main(int argc, char **argv) {
     cxxopts::Options options{"wakeup", "Send Wake On LAN Magic Packets to the target MAC-address."};
@@ -68,10 +72,17 @@ int main(int argc, char **argv) {
     const auto mac_address = result["mac"].as<std::string>();
     const auto port = result["port"].as<std::uint16_t>();
 
-    return send_wake_on_lan_packet(mac_address, port);
+    const auto mac_address_byte_vector = mac_address_to_byte_vector(mac_address);
+    if (!mac_address_byte_vector.has_value()) {
+        return EXIT_FAILURE;
+    }
+
+    const auto payload = create_wake_on_lan_payload(mac_address_byte_vector.value());
+
+    return send_payload(payload, port);
 }
 
-int send_wake_on_lan_packet(std::string_view mac_address, std::uint16_t port) {
+std::optional<std::vector<std::uint8_t>> mac_address_to_byte_vector(std::string_view mac_address) {
     // Split the MAC-address into 6 parts
     std::vector<std::string> string_parts{};
     string_parts.reserve(6);
@@ -79,7 +90,7 @@ int send_wake_on_lan_packet(std::string_view mac_address, std::uint16_t port) {
 
     if (string_parts.size() != 6) {
         fmt::print("Invalid MAC-address format\n");
-        return EXIT_FAILURE;
+        return std::nullopt;
     }
 
     // Convert all string representations to byte representations
@@ -92,13 +103,17 @@ int send_wake_on_lan_packet(std::string_view mac_address, std::uint16_t port) {
     }
     catch (const std::invalid_argument &error) {
         fmt::print("Could not convert MAC-address string representation to byte representation: {}\n", error.what());
-        return EXIT_FAILURE;
+        return std::nullopt;
     }
     catch (const std::exception &error) {
         fmt::print("Unknown error: {}\n", error.what());
-        return EXIT_FAILURE;
+        return std::nullopt;
     }
 
+    return parts;
+}
+
+std::vector<std::uint8_t> create_wake_on_lan_payload(const std::vector<std::uint8_t> &mac_address_byte_vector) {
     std::vector<std::uint8_t> payload{};
     payload.reserve(102);
 
@@ -109,11 +124,15 @@ int send_wake_on_lan_packet(std::string_view mac_address, std::uint16_t port) {
 
     // Append the MAC-address 16 times
     for (std::size_t i{0}; i < 16ul; ++i) {
-        for (const auto &part : parts) {
-            payload.emplace_back(part);
+        for (const auto &byte : mac_address_byte_vector) {
+            payload.emplace_back(byte);
         }
     }
 
+    return payload;
+}
+
+int send_payload(const std::vector<uint8_t> &payload, std::uint16_t port) {
     asio::io_context ctx{};
     asio::ip::udp::socket socket{ctx};
 
@@ -129,6 +148,7 @@ int send_wake_on_lan_packet(std::string_view mac_address, std::uint16_t port) {
         return EXIT_FAILURE;
     }
 
+    // Allow sending of broadcast messages
     try {
         socket.set_option(asio::socket_base::broadcast{true});
     }
