@@ -1,0 +1,12 @@
+[submodule "external/asio"]
+	path = external/asio
+	url = git@github.com:boostorg/asio.git
+[submodule "external/algorithm"]
+	path = external/algorithm
+	url = git@github.com:boostorg/algorithm.git
+[submodule "external/cxxopts"]
+	path = external/cxxopts
+	url = git@github.com:jarro2783/cxxopts.git
+[submodule "external/fmt"]
+	path = external/fmt
+	url = git@github.com:fmtlib/fmt.git
