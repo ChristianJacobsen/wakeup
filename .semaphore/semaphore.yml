@@ -41,7 +41,7 @@ blocks:
     dependencies:
       - Build
     skip:
-      when: branch != master
+      when: branch != 'master'
     task:
       jobs:
         - name: Publish
