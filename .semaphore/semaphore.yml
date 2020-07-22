@@ -1,0 +1,49 @@
+version: v1.0
+name: Linux-x64
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
+blocks:
+  - name: Upgrade System
+    dependencies: []
+    task:
+      prologue:
+        commands:
+          - checkout
+      jobs:
+        - name: Fetch Version 3.18 of CMake
+          commands:
+            - ./build-tools/000-upgrade-system/upgrade-cmake.sh
+      env_vars:
+        - name: CMAKE_CACHE_STRING
+          value: cmake-3-18-0
+        - name: CMAKE_VERSION
+          value: 3.18.0
+  - name: Build
+    dependencies:
+      - Upgrade System
+    task:
+      prologue:
+        commands:
+          - sem-version cpp 8
+          - checkout
+      jobs:
+        - name: Configure & Build
+          commands:
+            - ./build-tools/001-configure-and-build/configure-and-build.sh
+      env_vars:
+        - name: CMAKE_CACHE_STRING
+          value: cmake-3-18-0
+        - name: CMAKE_VERSION
+          value: 3.18.0
+  - name: Publish
+    dependencies:
+      - Build
+    skip:
+      when: branch != 'master'
+    task:
+      jobs:
+        - name: Publish
+          commands:
+            - ./build-tools/002-publish/publish.sh

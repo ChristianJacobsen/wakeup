@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.14)
 project(wakeup
         DESCRIPTION "Wake your computer from sleep by sending a Magic Packet"
         LANGUAGES CXX
@@ -8,12 +8,12 @@ set(Boost_NO_BOOST_CMAKE On)
 set(CMAKE_CXX_EXTENSIONS Off)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
+set(CMAKE_POSITION_INDEPENDENT_CODE On)
 
 include(./cmake/CPM.cmake)
 
 set(BOOST_VERSION 1.67.0)
 find_package(Boost ${BOOST_VERSION} QUIET)
-get_cmake_property(_variableNames VARIABLES)
 if (NOT ${Boost_FOUND})
   CPMAddPackage(
           NAME boost-cmake
@@ -22,7 +22,9 @@ if (NOT ${Boost_FOUND})
   )
 elseif (NOT TARGET Boost::system)
   # Add Boost::system target for Boost packages compiled without CMake
-  add_library(Boost_system INTERFACE)
+  if (NOT TARGET Boost_system)
+    add_library(Boost_system INTERFACE)
+  endif ()
   add_library(Boost::system ALIAS Boost_system)
 endif ()
 
