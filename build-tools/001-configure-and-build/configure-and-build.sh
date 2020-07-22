@@ -7,4 +7,7 @@ cache restore "${CMAKE_CACHE_STRING}"
 "./cmake-${CMAKE_VERSION}-Linux-x86_64/bin/cmake" -B build -DCMAKE_BUILD_TYPE=Release .
 
 # Build
-"./cmake-${CMAKE_VERSION}-Linux-x86_64/bin/cmake" --build build -j 2
+"./cmake-${CMAKE_VERSION}-Linux-x86_64/bin/cmake" --build build -j 3
+
+# Store the built binary as an artifact
+artifact push workflow build/wakeup

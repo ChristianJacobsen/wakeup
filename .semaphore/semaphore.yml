@@ -26,6 +26,7 @@ blocks:
     task:
       prologue:
         commands:
+          - sem-version cpp 8
           - checkout
       jobs:
         - name: Configure & Build
@@ -36,3 +37,13 @@ blocks:
           value: cmake-3-18-0
         - name: CMAKE_VERSION
           value: 3.18.0
+  - name: Publish
+    dependencies:
+      - Build
+    skip:
+      when: branch != master
+    task:
+      jobs:
+        - name: Publish
+          commands:
+            - ./build-tools/002-publish/publish.sh
