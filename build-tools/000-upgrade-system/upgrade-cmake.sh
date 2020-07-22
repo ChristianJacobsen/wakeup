@@ -8,4 +8,4 @@ wget -q "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cm
 tar zxf "cmake-${CMAKE_VERSION}-Linux-x86_64.tar.gz"
 
 # Store the newly downloaded version in the cache
-cache store "${CMAKE_CACHE_STRING}" "./cmake-${CMAKE_VERSION}-Linux-x86_64/bin/cmake"
+cache store "${CMAKE_CACHE_STRING}" "./cmake-${CMAKE_VERSION}-Linux-x86_64/"
