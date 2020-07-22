@@ -86,7 +86,7 @@ std::optional<std::vector<std::uint8_t>> mac_address_to_byte_vector(std::string_
     // Split the MAC-address into 6 parts
     std::vector<std::string> string_parts{};
     string_parts.reserve(6);
-    boost::split(string_parts, cbegin(mac_address), [](const auto &c) { return c == ':'; });
+    boost::split(string_parts, mac_address, [](const auto &c) { return c == ':'; });
 
     if (string_parts.size() != 6) {
         fmt::print("Invalid MAC-address format\n");

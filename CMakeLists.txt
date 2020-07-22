@@ -13,12 +13,17 @@ include(./cmake/CPM.cmake)
 
 set(BOOST_VERSION 1.67.0)
 find_package(Boost ${BOOST_VERSION} QUIET)
+get_cmake_property(_variableNames VARIABLES)
 if (NOT ${Boost_FOUND})
   CPMAddPackage(
           NAME boost-cmake
           GITHUB_REPOSITORY Orphis/boost-cmake
           VERSION ${BOOST_VERSION}
   )
+elseif (NOT TARGET Boost::system)
+  # Add Boost::system target for Boost packages compiled without CMake
+  add_library(Boost_system INTERFACE)
+  add_library(Boost::system ALIAS Boost_system)
 endif ()
 
 set(CXXOPTS_VERSION 2.2.0)
@@ -48,4 +53,4 @@ find_package(Threads REQUIRED)
 
 add_executable(wakeup main.cpp)
 target_compile_definitions(wakeup PRIVATE -DPROGRAM_VERSION="${CMAKE_PROJECT_VERSION}")
-target_link_libraries(wakeup PRIVATE Boost::boost cxxopts fmt Threads::Threads)
+target_link_libraries(wakeup PRIVATE Boost::boost Boost::system cxxopts fmt Threads::Threads)
